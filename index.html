@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foxlit — A reading habit, kept.</title>
+<meta name="description" content="Foxlit times your reading, remembers your notes, and keeps your streak. Stored on your device. Unlocked once. Kept forever.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1C1611;
+    --surface: #2E2419;
+    --surface-2: #3A2E20;
+    --ink: #F5EDE3;
+    --ink-dim: #C9BBA8;
+    --accent: #F2A65A;
+    --accent-deep: #E8935A;
+    --rule: rgba(245, 237, 227, 0.14);
+    --shadow: rgba(0,0,0,0.35);
+  }
+
+  html[data-theme="light"] {
+    --bg: #FAF6F0;
+    --surface: #FFFFFF;
+    --surface-2: #F1E6D8;
+    --ink: #2B1F14;
+    --ink-dim: #6B5C4D;
+    --accent: #B5651D;
+    --accent-deep: #8A4A15;
+    --rule: rgba(43, 31, 20, 0.14);
+    --shadow: rgba(43,31,20,0.10);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    line-height: 1.6;
+    transition: background 0.4s ease, color 0.4s ease;
+    overflow-x: hidden;
+  }
+
+  .display { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  a { color: inherit; }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+  nav .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 0.82rem;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s ease, background 0.3s ease;
+  }
+  .theme-toggle:hover { transform: translateY(-1px); }
+  .theme-toggle:focus-visible,
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 13px 24px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .btn-primary { background: var(--accent); color: #1C1611; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px var(--shadow); }
+  .btn-ghost { background: transparent; border-color: var(--rule); color: var(--ink); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-small { padding: 9px 16px; font-size: 0.82rem; border-radius: 8px; }
+
+  /* ---------- Hero ---------- */
+  .cover {
+    padding: 96px 0 64px;
+    position: relative;
+  }
+  .cover-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  h1.headline {
+    font-size: clamp(2.3rem, 4.6vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.12;
+    margin: 0 0 22px;
+    max-width: 13ch;
+  }
+  .sub {
+    font-size: 1.08rem;
+    color: var(--ink-dim);
+    max-width: 46ch;
+    margin: 0 0 30px;
+  }
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .trust-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    border: 1px dashed var(--rule);
+    padding: 8px 14px;
+    border-radius: 999px;
+  }
+  .trust-pill strong { color: var(--accent); font-weight: 500; }
+
+  /* ---------- Book object ---------- */
+  .book-object {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    max-width: 340px;
+    margin: 0 auto;
+    background: linear-gradient(160deg, var(--surface-2), var(--surface));
+    border-radius: 14px;
+    box-shadow: 0 30px 60px var(--shadow), 0 2px 0 var(--rule) inset;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+  .book-object .spine-line {
+    position: absolute;
+    left: 26px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--rule);
+  }
+  .book-object .flame-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 40px;
+    text-align: center;
+  }
+  .flame-icon {
+    width: 56px;
+    height: 56px;
+    color: var(--accent);
+    animation: flicker 2.6s ease-in-out infinite;
+  }
+  @keyframes flicker {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50% { transform: scale(1.05) translateY(-2px); }
+  }
+  .streak-number { font-family: 'Fraunces', serif; font-size: 3rem; font-weight: 600; line-height: 1; }
+  .streak-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); }
+  .week-strip { display: flex; gap: 8px; margin-top: 14px; }
+  .week-strip span { width: 8px; height: 8px; border-radius: 50%; background: var(--rule); }
+  .week-strip span.on { background: var(--accent); }
+  .dogear {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 64px;
+    height: 64px;
+    cursor: pointer;
+    transform-origin: top right;
+    transition: transform 0.35s cubic-bezier(.2,.9,.3,1.3);
+    z-index: 5;
+  }
+  .book-object:hover .dogear, .dogear:focus-visible { transform: rotate(-8deg) translate(-3px, 3px); }
+  .dogear svg { width: 100%; height: 100%; display: block; }
+
+  /* ---------- Table of Contents ---------- */
+  .toc { padding: 88px 0 40px; border-top: 1px solid var(--rule); }
+  .section-kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+  h2.section-title { font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 600; margin: 0 0 40px; }
+  .toc-list { list-style: none; margin: 0; padding: 0; }
+  .toc-list li { display: flex; align-items: baseline; gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--rule); }
+  .toc-list a { display: flex; align-items: baseline; gap: 14px; width: 100%; text-decoration: none; color: var(--ink); }
+  .toc-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.9rem; flex-shrink: 0; width: 2.4em; }
+  .toc-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1.15rem; flex-shrink: 0; }
+  .toc-leader { flex: 1; border-bottom: 1px dotted var(--rule); transform: translateY(-4px); margin: 0 4px; }
+  .toc-desc { color: var(--ink-dim); font-size: 0.9rem; flex-shrink: 0; max-width: 32ch; text-align: right; }
+  .toc-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    padding: 3px 8px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .toc-list li:hover .toc-title { color: var(--accent); }
+
+  /* ---------- Chapters ---------- */
+  .chapter {
+    padding: 80px 0;
+    border-top: 1px solid var(--rule);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .chapter.in-view { opacity: 1; transform: translateY(0); }
+  .chapter-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; align-items: center; }
+  .chapter:nth-child(even) .chapter-grid { grid-template-columns: 1.1fr 0.9fr; }
+  .chapter:nth-child(even) .chapter-media { order: 2; }
+  .chapter-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  h3.chapter-title { font-family: 'Fraunces', serif; font-size: clamp(1.5rem, 2.6vw, 1.9rem); font-weight: 600; margin: 0 0 16px; }
+  .chapter-body p { color: var(--ink-dim); max-width: 42ch; }
+  .chapter-media { background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; padding: 32px; min-height: 220px; display: flex; align-items: center; justify-content: center; }
+  .mock-timer { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: var(--accent); }
+  .mock-note { background: var(--surface-2); border-radius: 10px; padding: 18px 20px; font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-dim); max-width: 260px; border-left: 3px solid var(--accent); }
+  .mock-shelf { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 220px; }
+  .mock-shelf div { height: 72px; border-radius: 4px; background: linear-gradient(160deg, var(--accent), var(--accent-deep)); opacity: 0.85; }
+  .mock-shelf div:nth-child(2) { opacity: 0.65; }
+  .mock-shelf div:nth-child(3) { opacity: 0.45; }
+  .mock-shelf div:nth-child(4) { opacity: 0.3; }
+  .mock-bell { width: 68px; height: 68px; display: flex; align-items: center; justify-content: center; }
+  .mock-bell svg { width: 100%; height: 100%; color: var(--accent); }
+  .lock-badge { display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-deep); margin-bottom: 8px; }
+
+  /* ---------- Pricing ---------- */
+  .last-chapter { padding: 96px 0; border-top: 1px solid var(--rule); text-align: center; }
+  .price-card { max-width: 420px; margin: 40px auto 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 18px; padding: 40px 36px; box-shadow: 0 20px 50px var(--shadow); }
+  .price-tag { font-family: 'Fraunces', serif; font-size: 3.2rem; font-weight: 600; }
+  .price-tag span { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--ink-dim); font-weight: 400; display: block; margin-top: 6px; }
+  .price-list { list-style: none; padding: 0; margin: 28px 0; text-align: left; }
+  .price-list li { display: flex; gap: 10px; padding: 9px 0; color: var(--ink-dim); font-size: 0.92rem; border-bottom: 1px solid var(--rule); }
+  .price-list li:last-child { border-bottom: none; }
+  .price-list li::before { content: "✓"; color: var(--accent); font-weight: 600; flex-shrink: 0; }
+  .free-note { margin-top: 20px; font-size: 0.85rem; color: var(--ink-dim); }
+  .free-note strong { color: var(--ink); }
+
+  /* ---------- Beta signup ---------- */
+  .beta-section { padding: 80px 0; border-top: 1px solid var(--rule); text-align: center; }
+  .beta-form { max-width: 480px; margin: 32px auto 0; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .beta-input {
+    flex: 1;
+    min-width: 220px;
+    padding: 13px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .beta-input:focus { border-color: var(--accent); }
+  .beta-input::placeholder { color: var(--ink-dim); }
+  .beta-success { display: none; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; margin-top: 16px; }
+
+  /* ---------- Footer ---------- */
+  footer { border-top: 1px solid var(--rule); padding: 56px 0 40px; }
+  .back-cover { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+  .imprint { max-width: 40ch; color: var(--ink-dim); font-size: 0.9rem; }
+  .imprint strong { color: var(--ink); font-family: 'Fraunces', serif; }
+  .footer-links { display: flex; gap: 22px; font-size: 0.85rem; }
+  .footer-links a { text-decoration: none; color: var(--ink-dim); }
+  .footer-links a:hover { color: var(--accent); }
+  .copyright { margin-top: 36px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--ink-dim); opacity: 0.7; }
+
+  @media (max-width: 760px) {
+    .cover-grid, .chapter-grid { grid-template-columns: 1fr !important; }
+    .chapter:nth-child(even) .chapter-media { order: 0; }
+    .toc-desc { display: none; }
+    .book-object { max-width: 260px; }
+    .beta-form { flex-direction: column; }
+    .beta-input { min-width: unset; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#">
+      <img class="brand-logo" src="data:image/png;base64,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" alt="Foxlit logo">
+      Foxlit
+    </a>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Switch between light and dark mode">
+        <span id="themeIcon">☾</span>
+        <span id="themeLabel">Read after dark</span>
+      </button>
+      <a class="btn btn-primary btn-small" href="#last-chapter">Get it on Google Play</a>
+    </div>
+  </div>
+</nav>
+
+<header class="cover">
+  <div class="wrap cover-grid">
+    <div>
+      <p class="eyebrow">A reading habit app</p>
+      <h1 class="headline display">Some habits deserve a bookmark, not a subscription.</h1>
+      <p class="sub">Foxlit times your reading, remembers your notes, and keeps your streak — stored on your device, unlocked once, kept forever.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#last-chapter">Get it on Google Play</a>
+        <a class="btn btn-ghost" href="#toc">See what's inside</a>
+      </div>
+      <div class="trust-pill">
+        <span>🦊</span> <strong>$4.99 once.</strong>&nbsp;No subscription. Ever.
+      </div>
+    </div>
+    <div>
+      <div class="book-object">
+        <button class="dogear" aria-label="Peek at the streak underneath">
+          <svg viewBox="0 0 64 64" fill="none">
+            <path d="M64 0V64L0 0H64Z" fill="var(--bg)" />
+            <path d="M64 0V64L0 0H64Z" fill="url(#foldshade)" opacity="0.35"/>
+            <defs>
+              <linearGradient id="foldshade" x1="0" y1="0" x2="64" y2="64">
+                <stop offset="0" stop-color="#000"/>
+                <stop offset="1" stop-color="#000" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </button>
+        <div class="spine-line"></div>
+        <div class="flame-wrap">
+          <svg class="flame-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-.3-2-1-3 2 1 3 3.5 3 6a7 7 0 1 1-14 0c0-4 3-5 6-10Z"/>
+          </svg>
+          <div class="streak-number mono">7</div>
+          <div class="streak-label">day streak</div>
+          <div class="week-strip" aria-hidden="true">
+            <span class="on"></span><span class="on"></span><span class="on"></span>
+            <span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="toc" id="toc">
+  <div class="wrap">
+    <p class="section-kicker">Table of Contents</p>
+    <h2 class="section-title display">Everything inside Foxlit.</h2>
+    <ul class="toc-list">
+      <li><a href="#ch-timer"><span class="toc-num mono">I.</span><span class="toc-title">The Timer</span><span class="toc-leader"></span><span class="toc-desc">Start a session. Just read.</span></a></li>
+      <li><a href="#ch-streak"><span class="toc-num mono">II.</span><span class="toc-title">The Streak</span><span class="toc-leader"></span><span class="toc-desc">A flame that remembers you.</span></a></li>
+      <li><a href="#ch-notes"><span class="toc-num mono">III.</span><span class="toc-title">The Notes</span><span class="toc-leader"></span><span class="toc-desc">What you thought, tied to what you read.</span></a></li>
+      <li><a href="#ch-history"><span class="toc-num mono">IV.</span><span class="toc-title">The History</span><span class="toc-leader"></span><span class="toc-desc">Your last 10 sessions, free forever.</span></a></li>
+      <li><a href="#ch-library"><span class="toc-num mono">V.</span><span class="toc-title">The Library</span><span class="toc-tag">Unlocked</span><span class="toc-leader"></span><span class="toc-desc">Every book, every note, one shelf.</span></a></li>
+      <li><a href="#ch-bookmark"><span class="toc-num mono">VI.</span><span class="toc-title">The Bookmark</span><span class="toc-tag">Unlocked</span><span class="toc-leader"></span><span class="toc-desc">Save a page. Save a thought.</span></a></li>
+      <li><a href="#ch-reminder"><span class="toc-num mono">VII.</span><span class="toc-title">The Reminder</span><span class="toc-leader"></span><span class="toc-desc">A nudge at your hour, not the app's.</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<section class="chapter" id="ch-timer">
+  <div class="wrap chapter-grid">
+    <div class="chapter-media"><div class="mock-timer">12:04</div></div>
+    <div>
+      <p class="chapter-num">Chapter I</p>
+      <h3 class="chapter-title display">The Timer</h3>
+      <div class="chapter-body"><p>One button. Press start, read, press stop. Foxlit counts the minutes so you don't have to think about it — no goals to configure, nothing to set up before your first page.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch-streak">
+  <div class="wrap chapter-grid">
+    <div>
+      <p class="chapter-num">Chapter II</p>
+      <h3 class="chapter-title display">The Streak</h3>
+      <div class="chapter-body"><p>Every day you read, the flame grows. Miss a day, and it's honest about that too — no forgiving asterisks, just a simple, visible record of the habit you're actually building.</p></div>
+    </div>
+    <div class="chapter-media">
+      <div style="text-align:center;">
+        <svg class="flame-icon" viewBox="0 0 24 24" fill="currentColor" style="width:48px;height:48px;" aria-hidden="true">
+          <path d="M12 2c1 3-2 4-2 7a4 4 0 0 0 8 0c0-1-.3-2-1-3 2 1 3 3.5 3 6a7 7 0 1 1-14 0c0-4 3-5 6-10Z"/>
+        </svg>
+        <div class="streak-number mono" style="font-size:2.2rem;margin-top:6px;">12</div>
+        <div class="streak-label">current streak</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch-notes">
+  <div class="wrap chapter-grid">
+    <div class="chapter-media"><div class="mock-note">"The part where the tide turns — didn't see that coming."</div></div>
+    <div>
+      <p class="chapter-num">Chapter III</p>
+      <h3 class="chapter-title display">The Notes</h3>
+      <div class="chapter-body"><p>After every session, jot down a thought — or skip it entirely. Nothing is required. But six months from now, you'll be glad chapter twelve left an impression worth remembering.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch-history">
+  <div class="wrap chapter-grid">
+    <div>
+      <p class="chapter-num">Chapter IV</p>
+      <h3 class="chapter-title display">The History</h3>
+      <div class="chapter-body">
+        <p>Every session you log is saved, with your note and the book attached. Free readers can always see their last 10 sessions — unlock Foxlit to keep every session, forever.</p>
+      </div>
+    </div>
+    <div class="chapter-media">
+      <div style="width:100%;max-width:240px;">
+        <div style="padding:12px 0;border-bottom:1px solid var(--rule);font-size:0.88rem;color:var(--ink-dim);">Today · 1984 · 32 min</div>
+        <div style="padding:12px 0;border-bottom:1px solid var(--rule);font-size:0.88rem;color:var(--ink-dim);">Yesterday · 1984 · 45 min</div>
+        <div style="padding:12px 0;border-bottom:1px solid var(--rule);font-size:0.88rem;color:var(--ink-dim);">Mon · The Martian · 28 min</div>
+        <div style="padding:12px 0;border-bottom:1px solid var(--rule);font-size:0.88rem;color:var(--ink-dim);">Sun · The Martian · 51 min</div>
+        <div style="padding:12px 0;border-bottom:1px solid var(--rule);font-size:0.88rem;color:var(--ink-dim);">Sat · The Martian · 19 min</div>
+        <div style="padding:12px 0;font-size:0.78rem;color:var(--accent);font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;">🔒 Unlock to see more</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch-library">
+  <div class="wrap chapter-grid">
+    <div class="chapter-media"><div class="mock-shelf"><div></div><div></div><div></div><div></div></div></div>
+    <div>
+      <span class="lock-badge">🔓 Unlocked feature</span>
+      <p class="chapter-num">Chapter V</p>
+      <h3 class="chapter-title display">The Library</h3>
+      <div class="chapter-body"><p>Every book you've attached to a session, gathered on one shelf — tap any of them to revisit every note you've taken along the way.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch-bookmark">
+  <div class="wrap chapter-grid">
+    <div>
+      <span class="lock-badge">🔓 Unlocked feature</span>
+      <p class="chapter-num">Chapter VI</p>
+      <h3 class="chapter-title display">The Bookmark</h3>
+      <div class="chapter-body"><p>Pin a page and a thought to any book in your library — the moment you meant to come back to, exactly where you left it.</p></div>
+    </div>
+    <div class="chapter-media">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:64px;height:64px;color:var(--accent);" aria-hidden="true">
+        <path d="M6 2h12a1 1 0 0 1 1 1v19l-7-4-7 4V3a1 1 0 0 1 1-1Z"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="ch-reminder">
+  <div class="wrap chapter-grid">
+    <div class="chapter-media">
+      <div class="mock-bell">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 22a2.4 2.4 0 0 0 2.4-2.4h-4.8A2.4 2.4 0 0 0 12 22Zm7.2-6v-5.4c0-3.4-1.8-6.2-5-7V3a1.2 1.2 0 0 0-2.4 0v.6c-3.2.8-5 3.6-5 7V16l-2 2v1h16.4v-1l-2-2Z"/>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <p class="chapter-num">Chapter VII</p>
+      <h3 class="chapter-title display">The Reminder</h3>
+      <div class="chapter-body"><p>Pick your own hour. Foxlit nudges you once a day, at the time you chose — and it already knows to just say "nice work" if you've read today.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="last-chapter" id="last-chapter">
+  <div class="wrap">
+    <p class="section-kicker">The Last Chapter</p>
+    <h2 class="section-title display">No cliffhangers. No renewals.</h2>
+    <p style="color:var(--ink-dim);max-width:44ch;margin:0 auto;">Everything Foxlit will ever charge you for, all at once.</p>
+    <div class="price-card">
+      <div class="price-tag mono">$4.99<span>one-time purchase</span></div>
+      <ul class="price-list">
+        <li>The Library — every book, on one shelf</li>
+        <li>The Bookmark — notes pinned to any page</li>
+        <li>Unlimited session history, forever</li>
+        <li>Every future feature, included</li>
+      </ul>
+      <a class="btn btn-primary" href="#" style="width:100%;justify-content:center;">Get it on Google Play</a>
+      <p class="free-note"><strong>The Timer, Streak, Reminder, and your last 10 sessions are always free.</strong> No unlock required.</p>
+    </div>
+  </div>
+</section>
+
+<section class="beta-section" id="beta">
+  <div class="wrap">
+    <p class="section-kicker">Join the Beta</p>
+    <h2 class="section-title display">Be the first to read with Foxlit.</h2>
+    <p style="color:var(--ink-dim);max-width:44ch;margin:0 auto;">Foxlit is currently in private testing. Leave your email and we'll let you know the moment it's ready.</p>
+    <div class="beta-form">
+      <input class="beta-input" type="email" id="betaEmail" placeholder="your@email.com" aria-label="Your email address">
+      <button class="btn btn-primary" onclick="submitBeta()">Notify me</button>
+    </div>
+    <p class="beta-success" id="betaSuccess">🦊 You're on the list. We'll be in touch soon.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap back-cover">
+    <p class="imprint"><strong>Foxlit</strong> is published by Bareco, an independent developer building small, honest apps — no accounts, no ads, no data sold. Just software you own.</p>
+    <div class="footer-links">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="mailto:flatherdeveloping@gmail.com">Contact</a>
+    </div>
+  </div>
+  <div class="wrap copyright">© 2026 Bareco. Foxlit and its mark are used with love for readers everywhere.</div>
+</footer>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+
+  function setTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    icon.textContent = theme === 'dark' ? '☾' : '☀';
+    label.textContent = theme === 'dark' ? 'Read after dark' : 'Read in daylight';
+    try { localStorage.setItem('foxlit-theme', theme); } catch (e) {}
+  }
+
+  let stored = null;
+  try { stored = localStorage.getItem('foxlit-theme'); } catch (e) {}
+  setTheme(stored === 'light' ? 'light' : 'dark');
+
+  toggle.addEventListener('click', () => {
+    setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  const dogear = document.querySelector('.dogear');
+  if (dogear) dogear.addEventListener('click', () => dogear.classList.toggle('peeked'));
+
+  const chapters = document.querySelectorAll('.chapter');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) { entry.target.classList.add('in-view'); io.unobserve(entry.target); }
+      });
+    }, { threshold: 0.15 });
+    chapters.forEach(ch => io.observe(ch));
+  } else {
+    chapters.forEach(ch => ch.classList.add('in-view'));
+  }
+
+  function submitBeta() {
+    const email = document.getElementById('betaEmail').value.trim();
+    if (!email || !email.includes('@')) {
+      document.getElementById('betaEmail').focus();
+      return;
+    }
+    // In production, replace this with a real form submission (e.g. Formspree, Mailchimp, etc.)
+    document.querySelector('.beta-form').style.display = 'none';
+    document.getElementById('betaSuccess').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
